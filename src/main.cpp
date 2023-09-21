@@ -18,6 +18,8 @@ int CSpin = 10; //Chip Select pin.
 void ListDirectory(void);
 void ErrorHandler(int errorCode);
 void PrintDirectory(File dir, int numTabs);
+File Myfile1;
+int lineCounter = 0;
 
 
 void setup() {
@@ -42,6 +44,26 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   //ListDirectory();
+  Myfile1 = SD.open("/TEST.TXT", FILE_WRITE);
+  if(!Myfile1){ //Check if file exists.
+    Serial.println("Failed to open file!");
+    return;
+    }
+  Myfile1.println("This is line:" + String(lineCounter));
+  lineCounter++ ;
+  delay(1000);
+  if(lineCounter > 10){
+    Myfile1.close();
+    Serial.println("Writing Completed");
+    Myfile1 = SD.open("/TEST.TXT", FILE_READ);
+    Myfile1.seek(0);
+    while (Myfile1.available()) { //Read until EOF.
+    Serial.write(Myfile1.read()); //Read data from SD Card and write the file contents to the Serial Monitor.
+    } //End while
+    Myfile1.close();
+    while(1);
+  }
+  
 }
 
 
@@ -113,7 +135,7 @@ break;
 
 //ListDirectory **************************************************
 void ListDirectory(){
-    File myFile = SD.open(root); //Root directory.
+    File myFile = SD.open("/"); //Root directory.
     delay(200);//Wait for myFile to open.
     PrintDirectory(myFile, 0);
     myFile.close();//Close the myFile.
